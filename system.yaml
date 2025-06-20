@@ -1,0 +1,7 @@
+#shared:
+#  node:
+#    id: art1
+#    name: art1
+
+#artifactory:
+#  port: 8081

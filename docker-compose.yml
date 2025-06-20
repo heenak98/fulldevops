@@ -1,0 +1,138 @@
+# 📦 FULL DOCKER-COMPOSE BASED DEVOPS PROJECT SETUP (JAVA + MAVEN + COMPLETE STACK)
+ 
+# ✅ STACK:
+# - Jenkins (CI/CD)
+# - Docker (Host)
+# - Kubernetes (Local via Kind/Minikube)
+# - AWS + Terraform (Infra-as-Code)
+# - Prometheus + Grafana (Monitoring)
+# - SonarQube (Code Quality)
+# - JFrog Artifactory (Artifact Storage)
+# - Ansible (Configuration Management)
+ 
+# 🚀 GOAL:
+# Run all services using Docker Compose locally without proxy/SSL issues
+# Prepare for interview & production-style DevOps projects
+ 
+# --------------------------------------------------
+# ✅ STEP 1: PROJECT STRUCTURE SETUP
+# --------------------------------------------------
+# 📁 fulldevops/
+# ├── docker-compose.yml         <-- Main Compose file
+# ├── prometheus.yml             <-- Prometheus scrape config
+# ├── system.yaml                <-- JFrog boot config (prevents redirect/port issues)
+# ├── jenkins_home/              <-- Jenkins volume
+# ├── sonar_data/                <-- SonarQube data
+# ├── artifactory_data/          <-- JFrog Artifactory data
+# ├── grafana/                   <-- Grafana provisioning (optional)
+# └── terraform/                 <-- AWS infra later
+ 
+# --------------------------------------------------
+# ✅ STEP 2: docker-compose.yml (Clean and Stable Version)
+# --------------------------------------------------
+ 
+version: '3.8'
+ 
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk11
+    container_name: jenkins
+    user: root
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - ./jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+ 
+  sonarqube:
+    image: sonarqube:10.2.1-community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - ./sonar_data:/opt/sonarqube/data
+      - ./sonar_extensions:/opt/sonarqube/extensions
+    restart: always
+    mem_limit: 2g
+ 
+#  artifactory:
+#    image: docker.io/jfrog/artifactory-oss:7.49.12
+#    container_name: artifactory
+#    ports:
+#    - "8081:8081"
+#    volumes:
+#    - ./artifactory_data:/var/opt/jfrog/artifactory
+#    - ./system.yaml:/var/opt/jfrog/artifactory/etc/system.yaml:ro
+#    restart: always
+
+
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+ 
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+ 
+volumes:
+  grafana_data:
+ 
+# --------------------------------------------------
+# ✅ prometheus.yml (Place in root folder)
+# --------------------------------------------------
+# Real-time usage: tells Prometheus what services to monitor
+ 
+# prometheus.yml
+# ---------------
+# global:
+#   scrape_interval: 15s
+#
+# scrape_configs:
+#   - job_name: 'prometheus'
+#     static_configs:
+#       - targets: ['localhost:9090']
+#
+#   - job_name: 'jenkins'
+#     static_configs:
+#       - targets: ['host.docker.internal:8080']
+#
+#   - job_name: 'sonarqube'
+#     static_configs:
+#       - targets: ['host.docker.internal:9000']
+ 
+# --------------------------------------------------
+# ✅ system.yaml (Place in root folder)
+# --------------------------------------------------
+# JFrog Artifactory config to bypass SSL/redirect errors and bind to fixed port
+ 
+# system.yaml
+# ------------
+# shared:
+#   node:
+#     id: art1
+#     name: art1
+#
+# artifactory:
+#   port: 8081
+ 
+# --------------------------------------------------
+# 🔜 NEXT STEPS:
+# - Start with: docker-compose up -d
+# - Access: Jenkins (8080), SonarQube (9000), Artifactory (8081), Prometheus (9090), Grafana (3000)
+# - Create Jenkins pipeline with Sonar + JFrog
+# - Add AWS Terraform infra
+# - Add Kubernetes & Ansible later
