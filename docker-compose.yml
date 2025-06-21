@@ -39,13 +39,16 @@ services:
     container_name: jenkins
     user: root
     ports:
-      - "8080:8080"
-      - "50000:50000"
+    - "8080:8080"
+    - "50000:50000"
     volumes:
-      - ./jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
+    - ./jenkins_home:/var/jenkins_home
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /workspaces/fulldevops/sonar-scanner:/opt/sonar-scanner
+    environment:
+    - PATH=/opt/sonar-scanner/bin:$PATH
     restart: always
- 
+
   sonarqube:
     image: sonarqube:10.2.1-community
     container_name: sonarqube
