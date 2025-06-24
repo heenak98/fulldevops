@@ -42,9 +42,9 @@ pipeline {
         steps {
             withCredentials([usernamePassword(credentialsId: 'jfrog-token', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASS')]) {
                 sh '''
-                curl -u heenakausarshaikh99@gmail.com:**** \
-                -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
-                // -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
+                curl -H "Authorization: Bearer a0gpkxiwx0fgw" \
+     -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
+     -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
 
                 '''
                 }
