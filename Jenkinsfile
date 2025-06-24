@@ -10,7 +10,6 @@ pipeline {
 
   tools {
     maven 'Maven 3.9.6'
-    
   }
 
   stages {
@@ -24,34 +23,42 @@ pipeline {
     stage('Build with Maven') {
       steps {
         sh 'cd demo-app && mvn clean install'
-
       }
     }
 
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-            sh '''
-            sonar-scanner -Dsonar.login=$SONAR_TOKEN
-            '''
-            }
+          sh '''
+            cd demo-app
+            ${SONAR_SCANNER_HOME}/sonar-scanner \
+              -Dsonar.projectKey=demo-app \
+              -Dsonar.sources=src \
+              -Dsonar.java.binaries=target/classes \
+              -Dsonar.login=$SONAR_TOKEN
+          '''
+        }
       }
     }
 
-
-    
-    stage('Upload to JFrog') {
-    steps {
-        withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
-            sh '''
-                curl -H "Authorization: Bearer ${JFROG_TOKEN}" \
-                     -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar" \
-                     -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
-            '''
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 2, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
         }
+      }
     }
-}
 
-
+    stage('Upload to JFrog') {
+      steps {
+        withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
+          sh '''
+            curl -H "Authorization: Bearer ${JFROG_TOKEN}" \
+                 -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar" \
+                 -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
+          '''
+        }
+      }
     }
   }
+}
