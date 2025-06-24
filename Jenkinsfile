@@ -38,19 +38,20 @@ pipeline {
       }
     }
 
+
+    
     stage('Upload to JFrog') {
-        steps {
-           withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
-    sh '''
-        curl -H "Authorization: Bearer ${JFROG_TOKEN}" \
-             -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
-             -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
-    '''
+    steps {
+        withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
+            sh '''
+                curl -H "Authorization: Bearer ${JFROG_TOKEN}" \
+                     -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar" \
+                     -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
+            '''
+        }
+    }
 }
 
-
-            }
-        }
 
     }
   }
