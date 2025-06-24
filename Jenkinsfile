@@ -45,9 +45,8 @@ pipeline {
                 curl -u $JFROG_USER:$JFROG_PASS \
                 -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
                 // -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
-
+                '''
                 }
-                
             }
         }
 
