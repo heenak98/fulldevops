@@ -42,7 +42,7 @@ pipeline {
         steps {
             withCredentials([usernamePassword(credentialsId: 'jfrog-token', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASS')]) {
                 sh '''
-                curl -H "Authorization: Bearer 8d0d4682-e9af-480e-823e-0d97c8fde110a0gpkxiwx0fgw" \
+                curl -H "Authorization: Bearer cmVmdGtuOjAxOjE3ODIyNzI3NjY6YmtQV0JkWnVwZklFVWN0RWd4RFRuQkN6SE8y" \
      -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
      -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
 
