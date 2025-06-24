@@ -9,7 +9,7 @@ pipeline {
   }
 
   tools {
-    maven 'Maven3Maven 3.9.6'
+    maven 'Maven 3.9.6'
   }
 
   stages {
