@@ -39,14 +39,17 @@ pipeline {
     }
 
     stage('Upload to JFrog') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'jfrog-token', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASS')]) {
-          sh '''
-            curl -u $JFROG_USER:$JFROG_PASS -T target/*.jar \
-            "$ARTIFACTORY_URL/$ARTIFACTORY_REPO/java-devops-demo/1.0/java-devops-demo-1.0.jar"
-          '''
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'jfrog-token', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASS')]) {
+                sh '''
+                curl -u $JFROG_USER:$JFROG_PASS -T demo-app/target/demo-app-1.0-SNAPSHOT.jar \
+                "$ARTIFACTORY_URL/$ARTIFACTORY_REPO/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar"
+                 '''
+                }
+                
+            }
         }
-      }
+
     }
   }
 }
