@@ -29,15 +29,10 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-          sh '''
-            cd demo-app
-            ${SONAR_SCANNER_HOME}/sonar-scanner \
-              -Dsonar.projectKey=demo-app \
-              -Dsonar.sources=src \
-              -Dsonar.java.binaries=target/classes \
-              -Dsonar.login=$SONAR_TOKEN
-          '''
-        }
+            sh '''
+            sonar-scanner -Dsonar.login=$SONAR_TOKEN
+            '''
+            }
       }
     }
 
