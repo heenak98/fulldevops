@@ -10,6 +10,7 @@ pipeline {
 
   tools {
     maven 'Maven 3.9.6'
+    sonarQube 'SonarScanner'
   }
 
   stages {
@@ -30,7 +31,9 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-          sh "$SONAR_SCANNER_HOME/sonar-scanner -Dsonar.login=$SONAR_TOKEN"
+          sh '''
+            $SONAR_SCANNER_HOME/sonar-scanner -Dsonar.login=$SONAR_TOKEN
+          '''
         }
       }
     }
