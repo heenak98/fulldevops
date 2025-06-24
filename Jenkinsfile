@@ -42,9 +42,10 @@ pipeline {
         steps {
             withCredentials([usernamePassword(credentialsId: 'jfrog-token', usernameVariable: 'JFROG_USER', passwordVariable: 'JFROG_PASS')]) {
                 sh '''
-                curl -u $JFROG_USER:$JFROG_PASS -T demo-app/target/demo-app-1.0-SNAPSHOT.jar \
-                "$ARTIFACTORY_URL/$ARTIFACTORY_REPO/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar"
-                 '''
+                curl -u $JFROG_USER:$JFROG_PASS \
+                -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/demo-app/1.0/demo-app-1.0-SNAPSHOT.jar" \
+                // -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
+
                 }
                 
             }
