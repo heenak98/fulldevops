@@ -48,9 +48,10 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
           sh '''
-            curl -H "Authorization: Bearer ${JFROG_TOKEN}" \
-                 -X PUT "https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar" \
-                 -T demo-app/target/demo-app-1.0-SNAPSHOT.jar
+            curl -H "Authorization: Bearer $JFROG_TOKEN" \
+     -T demo-app/target/demo-app-1.0-SNAPSHOT.jar \
+     https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar
+
           '''
         }
       }

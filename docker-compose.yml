@@ -34,6 +34,11 @@
     
 version: '3.8'
 
+networks:
+ devops-net:
+   driver: bridge
+
+
 services:
   jenkins:
     build:
@@ -49,6 +54,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./demo-app:/var/jenkins_home/workspace/demo-app
     restart: always
+    networks:
+      - devops-net
+
 
   sonarqube:
     image: sonarqube:10.2.1-community
@@ -62,6 +70,8 @@ services:
       - ./sonar_extensions:/opt/sonarqube/extensions
     restart: always
     mem_limit: 2g
+    networks:
+      - devops-net
 
 #  artifactory:
 #    image: docker.io/jfrog/artifactory-oss:7.49.12
