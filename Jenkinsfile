@@ -5,7 +5,7 @@ pipeline {
     SONAR_SCANNER_HOME = "/opt/sonar-scanner/sonar-scanner/bin"
     SONAR_TOKEN = credentials('sonarqube-token')
     ARTIFACTORY_URL = "https://heena98.jfrog.io/artifactory"
-    ARTIFACTORY_REPO = "libs-release-local"
+    ARTIFACTORY_REPO = "docker-devops"
   }
 
   tools {
