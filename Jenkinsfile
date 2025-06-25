@@ -47,12 +47,19 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         sh '''
-      docker build -t java-devops-app:1.0 .
-      docker tag java-devops-app:1.0 yourdomain.jfrog.io/docker-devops/java-devops-app:1.0
-      docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASS yourdomain.jfrog.io
-      docker push yourdomain.jfrog.io/docker-devops/java-devops-app:1.0
-      '''
-      }
-      }
+        # Step 1: Build the Docker image
+        docker build -t java-devops-app:1.0 .
+        
+        # Step 2: Tag the image for your JFrog Artifactory Docker repo
+        docker tag java-devops-app:1.0 heena98.jfrog.io/docker-devops/java-devops-app:1.0
+        
+        # Step 3: Log in to your JFrog Artifactory Docker repo
+        docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASS heena98.jfrog.io
+ 
+        # Step 4: Push the image
+        docker push heena98.jfrog.io/docker-devops/java-devops-app:1.0
+        '''
+        }
+        }
       }
 }
