@@ -43,18 +43,16 @@ pipeline {
         }
       }
     }
-
-    stage('Upload to JFrog') {
+    
+    stage('Docker Build & Push') {
       steps {
-        withCredentials([string(credentialsId: 'jfrog-token', variable: 'JFROG_TOKEN')]) {
-          sh '''
-            curl -H "Authorization: Bearer $JFROG_TOKEN" \
-     -T demo-app/target/demo-app-1.0-SNAPSHOT.jar \
-     https://heena98.jfrog.io/artifactory/libs-release-local/com/heena/devops/demo-app/1.0-SNAPSHOT/demo-app-1.0-SNAPSHOT.jar
-
-          '''
-        }
+        sh '''
+      docker build -t java-devops-app:1.0 .
+      docker tag java-devops-app:1.0 yourdomain.jfrog.io/docker-devops/java-devops-app:1.0
+      docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASS yourdomain.jfrog.io
+      docker push yourdomain.jfrog.io/docker-devops/java-devops-app:1.0
+      '''
       }
-    }
-  }
+      }
+      }
 }

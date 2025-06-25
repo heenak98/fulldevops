@@ -15,4 +15,11 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+        <id>jfrog-repo</id>
+        <url>https://heena98.jfrog.io/artifactory/libs-release-local</url>
+    </repository>
+</distributionManagement>
+
 </project>
