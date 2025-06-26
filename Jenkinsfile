@@ -48,6 +48,9 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
         sh '''
+        mkdir -p /tmp/.docker
+        export DOCKER_CONFIG=/tmp/.docker
+
         # Step 1: Build the Docker image
         docker build -t java-devops-app:1.0 .
         
