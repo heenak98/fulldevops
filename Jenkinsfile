@@ -54,8 +54,8 @@ pipeline {
         docker tag java-devops-app:1.0 heena98.jfrog.io/docker-devops/java-devops-app:1.0
         
         # Step 3: Log in to your JFrog Artifactory Docker repo
-        docker login -u $ARTIFACTORY_USER -p $ARTIFACTORY_PASS heena98.jfrog.io
- 
+        echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heena98.jfrog.io
+        
         # Step 4: Push the image
         docker push heena98.jfrog.io/docker-devops/java-devops-app:1.0
         '''
