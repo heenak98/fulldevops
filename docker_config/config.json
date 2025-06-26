@@ -1,0 +1,19 @@
+{
+  "auths": {
+    "docker.pkg.github.com": {
+      "auth": "VVNFUk5BTUU6Z2h1XzNYWGw3eWlzYmFtNmFnOEdCZHducnpGRVRNRFpUeDBqdVFlOA=="
+    },
+    "ghcr.io": {
+      "auth": "aGVlbmE5ODpnaHVfM1hYbDd5aXNiYW02YWc4R0Jkd25yekZFVE1EWlR4MGp1UWU4"
+    },
+    "heena98.jfrog.io": {
+      "auth": "aGVlbmFrYXVzYXJzaGFpa2g5OUBnbWFpbC5jb206Y21WbWRHdHVPakF4T2pFM09ESXlOekkzTmpZNlltdFFWMEprV25Wd1prbEZWV04wUldkNFJGUnVRa042U0U4eQ=="
+    },
+    "https://index.docker.io/v1/": {
+      "auth": "Y29kZXNwYWNlc2RldjpkZjBlZTZhZC1mOWIyLTQyM2MtODc4Zi02MzVkMGM5NGRjYzI="
+    }
+  },
+  "HttpHeaders": {
+    "X-Meta-Source-Client": "github/codespaces"
+  }
+}
