@@ -46,6 +46,7 @@ pipeline {
     
     stage('Docker Build & Push') {
       steps {
+        withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
         sh '''
         # Step 1: Build the Docker image
         docker build -t java-devops-app:1.0 .
@@ -55,11 +56,12 @@ pipeline {
         
         # Step 3: Log in to your JFrog Artifactory Docker repo
         echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heena98.jfrog.io
-        
+
         # Step 4: Push the image
         docker push heena98.jfrog.io/docker-devops/java-devops-app:1.0
         '''
         }
         }
       }
+}
 }
