@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: java-app
-          image: heena98.jfrog.io/docker-devops/java-devops-app:3.0
+          image: heena98.jfrog.io/docker-devops/java-devops-app:2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8081
