@@ -66,5 +66,16 @@ pipeline {
         }
         }
       }
+      
+    stage("deploy to kubernetes"){
+      steps{
+        sh '''
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/java-devops-ingress.yaml
+        kubectl apply -f k8s/service.yaml
+        '''
+      }
+    }
+      
 }
 }
