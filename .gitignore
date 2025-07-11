@@ -6,5 +6,9 @@ prometheus_data/
 **/secrets/
 **/target/
 **/*.log
+*.tfstate
+*.tfvars
+.terraform/
+secrets.auto.tfvars
 
 
