@@ -13,6 +13,7 @@ spec:
       labels:
         app: java-devops-app
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: java-app
         image: heenak98.jfrog.io/docker-devops/java-devops-app:2.0
