@@ -75,6 +75,20 @@ pipeline {
         '''
       }
     }
+
+    stage('Port Forward & Test') {
+      steps {
+        script {
+          // Run port-forward in background
+          sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev &'
+          // Wait for port-forward to be ready
+          sleep 5
+          // Run tests against localhost:8081
+          sh 'curl http://localhost:8081/health'
+        }
+      }
+    }
+
       
 }
 }
