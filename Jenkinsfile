@@ -30,7 +30,9 @@ pipeline {
       steps {
         withSonarQubeEnv('SonarQube') {
             sh '''
-            sonar-scanner -Dsonar.login=$SONAR_TOKEN
+            cd demo-app
+            mvn dependency:copy-dependencies
+            sonar-scanner -Dsonar.token=$SONAR_TOKEN
             '''
             }
       }
