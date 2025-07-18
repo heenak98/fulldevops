@@ -72,10 +72,13 @@ pipeline {
       
     stage("deploy to kubernetes"){
       steps{
+        withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
         sh '''
+        kubectl apply -f k8s/namespace.yaml
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
         '''
+        }
       }
     }
 
