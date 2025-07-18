@@ -2,14 +2,17 @@ FROM jenkins/jenkins:lts-jdk11
 
 USER root
 
-# Install Docker CLI and SonarScanner
+# Install Docker CLI, SonarScanner, and kubectl
 RUN apt-get update && \
-    apt-get install -y unzip wget docker.io && \
+    apt-get install -y unzip wget curl docker.io && \
     wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip && \
     unzip sonar-scanner-cli-5.0.1.3006-linux.zip && \
     mv sonar-scanner-5.0.1.3006-linux /opt/sonar-scanner && \
     ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner && \
-    rm sonar-scanner-cli-5.0.1.3006-linux.zip
+    rm sonar-scanner-cli-5.0.1.3006-linux.zip && \
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/
 
 # Add Jenkins user to Docker group
 RUN usermod -aG docker jenkins
