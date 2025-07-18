@@ -55,6 +55,8 @@ services:
       - ./demo-app:/var/jenkins_home/workspace/demo-app
       - ./docker_config/config.json:/root/.docker/config.json
       - ~/.kube/config:/var/jenkins_home/.kube/config  
+      - ~/.aws:/root/.aws  # or /var/jenkins_home/.aws if running as jenkins user
+
       
     restart: always
     networks:
