@@ -31,6 +31,7 @@ pipeline {
         withSonarQubeEnv('SonarQube') {
             sh '''
             cd demo-app
+            mvn clean install
             mvn dependency:copy-dependencies
             sonar-scanner -Dsonar.token=$SONAR_TOKEN
             '''
