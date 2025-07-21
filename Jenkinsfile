@@ -55,16 +55,16 @@ pipeline {
             export DOCKER_CONFIG=/tmp/.docker
 
             # Step 1: Build the Docker image
-            docker build -t java-devops-app:3.0 .
+            docker build -t java-devops-app:4.0 .
 
             # Step 2: Tag the image for your JFrog Artifactory Docker repo
-            docker tag java-devops-app:3.0 heenak98.jfrog.io/docker-devops/java-devops-app:3.0
+            docker tag java-devops-app:4.0 heenak98.jfrog.io/docker-devops/java-devops-app:4.0
 
             # Step 3: Log in to your JFrog Artifactory Docker repo
             echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
 
             # Step 4: Push the image
-            docker push heenak98.jfrog.io/docker-devops/java-devops-app:3.0
+            docker push heenak98.jfrog.io/docker-devops/java-devops-app:4.0
           '''
         }
       }
@@ -82,7 +82,7 @@ pipeline {
           sh '''
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            aws eks update-kubeconfig --name your-cluster-name --region us-east-1
+            aws eks update-kubeconfig --name my-eks-cluster-new9 --region us-east-1
           '''
         }
       }
