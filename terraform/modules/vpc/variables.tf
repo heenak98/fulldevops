@@ -20,3 +20,10 @@ variable "region" {
 variable "cluster_name" {
   description = "Name of the EKS cluster for subnet tagging"
 }
+
+variable "availability_zones" {
+  type        = list(string)
+  description = "List of availability zones to use for subnets"
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]  # Only supported AZs
+}
+

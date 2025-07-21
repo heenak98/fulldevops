@@ -56,8 +56,7 @@ services:
       - ./docker_config/config.json:/root/.docker/config.json
       - ~/.kube/config:/var/jenkins_home/.kube/config  
       - ~/.aws:/root/.aws  # or /var/jenkins_home/.aws if running as jenkins user
-
-      
+    dns: 8.8.8.8  # ✅ Add this line
     restart: always
     networks:
       - devops-net

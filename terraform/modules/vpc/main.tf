@@ -11,7 +11,7 @@ resource "aws_subnet" "public" {
   cidr_block              = var.public_subnets[count.index]
   vpc_id                  = aws_vpc.this.id
   map_public_ip_on_launch = true
-  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  availability_zone = var.availability_zones[count.index]
 
   tags = {
     "Name"                                      = "public-subnet-${count.index}"
@@ -24,7 +24,7 @@ resource "aws_subnet" "private" {
   count             = length(var.private_subnets)
   cidr_block        = var.private_subnets[count.index]
   vpc_id            = aws_vpc.this.id
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  availability_zone = var.availability_zones[count.index]
 
   tags = {
     "Name"                                      = "private-subnet-${count.index}"
@@ -34,4 +34,4 @@ resource "aws_subnet" "private" {
 }
 
  
-data "aws_availability_zones" "available" {}
+# data "aws_availability_zones" "available" {}

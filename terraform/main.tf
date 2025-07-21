@@ -16,17 +16,19 @@ provider "aws" {
 }
  
 module "vpc" {
-  source           = "./modules/vpc"
-  region           = var.region
-  vpc_cidr         = var.vpc_cidr
-  public_subnets   = var.public_subnets
-  private_subnets  = var.private_subnets
-  cluster_name = var.cluster_name
+  source             = "./modules/vpc"
+  region             = var.region
+  vpc_cidr           = var.vpc_cidr
+  public_subnets     = var.public_subnets
+  private_subnets    = var.private_subnets
+  cluster_name       = var.cluster_name
+  availability_zones = ["us-east-1a", "us-east-1b"]  # ✅ Add this line
 }
+
  
 module "eks_cluster" {
   source             = "./modules/eks_cluster"
-  cluster_name       = "my-eks-cluster-new6"
+  cluster_name       = "my-eks-cluster-new9"
   cluster_role_arn   = module.iam_cluster_role.iam_role_arn
   subnet_ids         = module.vpc.private_subnet_ids
   kubernetes_version = "1.27"

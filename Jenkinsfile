@@ -29,55 +29,73 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQube') {
-            sh '''
+          sh '''
             cd demo-app
             mvn clean install
             mvn dependency:copy-dependencies
             sonar-scanner -Dsonar.token=$SONAR_TOKEN
-            '''
-            }
+          '''
+        }
       }
     }
 
     stage('Quality Gate') {
-     steps {
-       timeout(time: 5, unit: 'MINUTES') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
-     }
+      }
     }
-    
+
     stage('Docker Build & Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
-        sh '''
-        mkdir -p /tmp/.docker
-        export DOCKER_CONFIG=/tmp/.docker
+          sh '''
+            mkdir -p /tmp/.docker
+            export DOCKER_CONFIG=/tmp/.docker
 
-        # Step 1: Build the Docker image
-        docker build -t java-devops-app:3.0 .
-        
-        # Step 2: Tag the image for your JFrog Artifactory Docker repo
-        docker tag java-devops-app:3.0 heenak98.jfrog.io/docker-devops/java-devops-app:3.0
-        
-        # Step 3: Log in to your JFrog Artifactory Docker repo
-        echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
+            # Step 1: Build the Docker image
+            docker build -t java-devops-app:3.0 .
 
-        # Step 4: Push the image
-        docker push heenak98.jfrog.io/docker-devops/java-devops-app:3.0
-        '''
-        }
+            # Step 2: Tag the image for your JFrog Artifactory Docker repo
+            docker tag java-devops-app:3.0 heenak98.jfrog.io/docker-devops/java-devops-app:3.0
+
+            # Step 3: Log in to your JFrog Artifactory Docker repo
+            echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
+
+            # Step 4: Push the image
+            docker push heenak98.jfrog.io/docker-devops/java-devops-app:3.0
+          '''
         }
       }
-      
-    stage("deploy to kubernetes"){
-      steps{
+    }
+
+    stage('Configure kubeconfig') {
+      steps {
+        withCredentials([
+          usernamePassword(
+            credentialsId: 'aws-static-creds',
+            usernameVariable: 'AWS_ACCESS_KEY_ID',
+            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+          )
+        ]) {
+          sh '''
+            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+            aws eks update-kubeconfig --name your-cluster-name --region us-east-1
+          '''
+        }
+      }
+    }
+
+    stage('Deploy to Kubernetes') {
+      steps {
         withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
-        sh '''
-        kubectl apply -f k8s/namespace.yaml
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-        '''
+          sh '''
+            kubectl apply -f k8s/namespace.yaml
+            kubectl apply -f k8s/deployment.yaml
+            kubectl apply -f k8s/service.yaml
+          '''
         }
       }
     }
@@ -94,7 +112,5 @@ pipeline {
         }
       }
     }
-
-      
-}
+  }
 }
