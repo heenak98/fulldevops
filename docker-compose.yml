@@ -54,9 +54,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./demo-app:/var/jenkins_home/workspace/demo-app
       - ./docker_config/config.json:/root/.docker/config.json
-      - ~/.kube/config:/var/jenkins_home/.kube/config  
+      - /home/codespace/.kube/config:/root/.kube/config
       - ~/.aws:/root/.aws  # or /var/jenkins_home/.aws if running as jenkins user
     dns: 8.8.8.8  # ✅ Add this line
+    dns_search: .
     restart: always
     networks:
       - devops-net

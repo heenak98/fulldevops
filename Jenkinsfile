@@ -100,7 +100,7 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
-        withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
+        withEnv(["KUBECONFIG=/root/.kube/config"]){
           sh '''
             kubectl apply -f k8s/namespace.yaml
             kubectl apply -f k8s/deployment.yaml
