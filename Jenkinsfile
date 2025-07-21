@@ -16,18 +16,21 @@ pipeline {
 
     stage('Checkout') {
       steps {
+        echo "Checking out source code..."
         git branch: 'main', url: 'https://github.com/heena98/fulldevops.git'
       }
     }
 
     stage('Build with Maven') {
       steps {
+        echo "Building project with Maven..."
         sh 'cd demo-app && mvn clean install'
       }
     }
 
     stage('SonarQube Analysis') {
       steps {
+        echo "Running SonarQube analysis..."
         withSonarQubeEnv('SonarQube') {
           sh '''
             cd demo-app
@@ -41,6 +44,7 @@ pipeline {
 
     stage('Quality Gate') {
       steps {
+        echo "Waiting for SonarQube quality gate..."
         timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
         }
@@ -49,29 +53,32 @@ pipeline {
 
     stage('Docker Build & Push') {
       steps {
+        echo "Building and pushing Docker image..."
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
-          sh '''
-            mkdir -p /tmp/.docker
-            export DOCKER_CONFIG=/tmp/.docker
+          script {
+            try {
+              sh '''
+                mkdir -p /tmp/.docker
+                export DOCKER_CONFIG=/tmp/.docker
 
-            # Step 1: Build the Docker image
-            docker build -t java-devops-app:4.0 .
-
-            # Step 2: Tag the image for your JFrog Artifactory Docker repo
-            docker tag java-devops-app:4.0 heenak98.jfrog.io/docker-devops/java-devops-app:4.0
-
-            # Step 3: Log in to your JFrog Artifactory Docker repo
-            echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
-
-            # Step 4: Push the image
-            docker push heenak98.jfrog.io/docker-devops/java-devops-app:4.0
-          '''
+                docker build -t java-devops-app:4.0 .
+                docker tag java-devops-app:4.0 heenak98.jfrog.io/docker-devops/java-devops-app:4.0
+                echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
+                docker push heenak98.jfrog.io/docker-devops/java-devops-app:4.0
+              '''
+            } catch (Exception e) {
+              echo "Docker push failed: ${e.getMessage()}"
+              currentBuild.result = 'FAILURE'
+              error("Stopping pipeline due to Docker push failure.")
+            }
+          }
         }
       }
     }
 
     stage('Configure kubeconfig') {
       steps {
+        echo "Configuring kubeconfig for AWS EKS..."
         withCredentials([
           usernamePassword(
             credentialsId: 'aws-static-creds',
@@ -90,6 +97,7 @@ pipeline {
 
     stage('Deploy to Kubernetes') {
       steps {
+        echo "Deploying to Kubernetes..."
         withEnv(["KUBECONFIG=/var/jenkins_home/.kube/config"]) {
           sh '''
             kubectl apply -f k8s/namespace.yaml
@@ -102,13 +110,17 @@ pipeline {
 
     stage('Port Forward & Test') {
       steps {
+        echo "Running port-forward and testing service..."
         script {
-          // Run port-forward in background
           sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev &'
-          // Wait for port-forward to be ready
           sleep 5
-          // Run tests against localhost:8081
           sh 'curl http://localhost:8081/health'
+        }
+      }
+      post {
+        always {
+          echo "Cleaning up background port-forward process..."
+          sh 'pkill -f "kubectl port-forward" || true'
         }
       }
     }
