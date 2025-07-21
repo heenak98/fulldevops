@@ -114,7 +114,7 @@ pipeline {
       steps {
         echo "Running port-forward and testing service..."
         script {
-          sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev &'
+          sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev --address=0.0.0.0'
           sleep 5
           sh 'curl http://localhost:8081/health'
         }
