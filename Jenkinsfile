@@ -1,4 +1,3 @@
-
 pipeline {
   agent any
 
@@ -33,9 +32,9 @@ pipeline {
       steps {
         echo "Running SonarQube analysis..."
         dir('demo-app') {
-        withSonarQubeEnv('SonarQube') {
-        sh  'mvn clean verify sonar:sonar'
-        }
+          withSonarQubeEnv('SonarQube') {
+            sh 'mvn clean verify sonar:sonar'
+          }
         }
       }
     }
@@ -85,9 +84,8 @@ pipeline {
           )
         ]) {
           sh '''
-            export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-            export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1 --profile default
+            mkdir -p /root/.kube
+            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1 --kubeconfig /root/.kube/config
           '''
         }
       }
@@ -96,7 +94,17 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
-        withEnv(["KUBECONFIG=/root/.kube/config"]){
+        withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
+          sh '''
+            kubectl create secret docker-registry jfrog-creds \
+              --docker-server=heenak.jfrog.io \
+              --docker-username=$ARTIFACTORY_USER \
+              --docker-password=$ARTIFACTORY_PASS \
+              --docker-email=heenakausarshaikh99@gmail.com \
+              --namespace=dev || true
+          '''
+        }
+        withEnv(["KUBECONFIG=/root/.kube/config"]) {
           sh '''
             kubectl apply -f k8s/namespace.yaml
             kubectl apply -f k8s/deployment.yaml
@@ -105,33 +113,31 @@ pipeline {
         }
       }
     }
-    
+
     stage('Port Forward & Test') {
       steps {
         echo "Running port-forward and testing service..."
         script {
-          // Wait until the pod is in Running state
           timeout(time: 2, unit: 'MINUTES') {
             waitUntil {
               def status = sh(
                 script: "kubectl get pods -l app=java-devops-app -n dev -o jsonpath='{.items[0].status.phase}'",
                 returnStdout: true
-                ).trim()
-                return status == "Running"
-                }
+              ).trim()
+              return status == "Running"
+            }
           }
-          // Proceed with port-forward and test
           sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev --address=0.0.0.0 &'
           sleep 5
           sh 'curl http://localhost:8081/health'
-          }
-          }
-          post {
-            always {
-              echo "Cleaning up background port-forward process..."
-              sh 'pkill -f "kubectl port-forward" || true'
-              }
-              }
-              }
+        }
+      }
+      post {
+        always {
+          echo "Cleaning up background port-forward process..."
+          sh 'pkill -f "kubectl port-forward" || true'
+        }
+      }
+    }
   }
 }
