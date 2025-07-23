@@ -84,9 +84,10 @@ pipeline {
           )
         ]) {
           sh '''
-          mkdir -p /home/codespace/.kube
-          aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/codespace/.kube/config
-          chown -R codespace:codespace /home/codespace/.kube
+          USERNAME=$(whoami)
+          mkdir -p /home/$USERNAME/.kube
+          aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/$USERNAME/.kube/config
+          chown -R $USERNAME:$USERNAME /home/$USERNAME/.kube
           '''
         }
     }
