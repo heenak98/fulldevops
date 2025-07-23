@@ -6,6 +6,7 @@ pipeline {
     SONAR_TOKEN = credentials('sonarqube-token')
     ARTIFACTORY_URL = "https://heenak.jfrog.io/artifactory"
     ARTIFACTORY_REPO = "docker-devops"
+    KUBECONFIG = "/home/codespace/.kube/config"
   }
 
   tools {
@@ -72,7 +73,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('Configure kubeconfig') {
       steps {
         echo "Configuring kubeconfig for AWS EKS..."
@@ -84,20 +85,25 @@ pipeline {
           )
         ]) {
           sh '''
-          mkdir -p /home/codespace/.kube
-          aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/codespace/.kube/config
+            mkdir -p /home/codespace/.kube
+            aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/codespace/.kube/config
           '''
         }
+      }
     }
-}
+
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
-        withEnv(["KUBECONFIG=/root/.kube/config"]) {
-          // Step 1: Create namespace
-          sh 'kubectl apply -f k8s/namespace.yaml'
-        }
 
+        // Debug cluster access
+        sh 'kubectl config current-context'
+        sh 'kubectl get nodes'
+
+        // Apply namespace
+        sh 'kubectl apply -f k8s/namespace.yaml --validate=false'
+
+        // Create image pull secret
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
           sh '''
             kubectl create secret docker-registry jfrog-creds \
@@ -108,42 +114,35 @@ pipeline {
               --namespace=dev || true
           '''
         }
-        withEnv(["KUBECONFIG=/root/.kube/config"]) {
-          sh '''
-            
-            kubectl apply -f k8s/deployment.yaml
-            kubectl apply -f k8s/service.yaml
-          '''
-        }
+
+        // Apply deployment and service
+        sh '''
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+        '''
       }
     }
-    
+
     stage('Port Forward & Test') {
       steps {
         echo "Running port-forward and testing service..."
         script {
-          // 🔍 Debugging output
           sh 'kubectl get pods -n dev -o wide'
           sh 'kubectl describe pod -l app=java-devops-app -n dev || true'
           sh 'kubectl get events -n dev --sort-by=.metadata.creationTimestamp || true'
-          
-          // ✅ Wait for pod to be ready
+
           sh 'kubectl wait --for=condition=ready pod -l app=java-devops-app -n dev --timeout=120s'
-          
-          // 🚀 Start port-forward in background
           sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev --address=0.0.0.0 &'
           sleep 5
-          
-          // 🧪 Test the service
           sh 'curl http://localhost:8081/health'
-          }
-          }
-          post {
-            always {
-              echo "Cleaning up background port-forward process..."
-              sh 'pkill -f "kubectl port-forward" || true'
-          }
+        }
+      }
+      post {
+        always {
+          echo "Cleaning up background port-forward process..."
+          sh 'pkill -f "kubectl port-forward" || true'
         }
       }
     }
   }
+}
