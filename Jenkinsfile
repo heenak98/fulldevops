@@ -118,31 +118,34 @@ pipeline {
         }
       }
     }
-
+    
     stage('Port Forward & Test') {
       steps {
         echo "Running port-forward and testing service..."
         script {
-          timeout(time: 2, unit: 'MINUTES') {
-            waitUntil {
-              def status = sh(
-                script: "kubectl get pods -l app=java-devops-app -n dev -o jsonpath='{.items[0].status.phase}'",
-                returnStdout: true
-              ).trim()
-              return status == "Running"
-            }
-          }
+          // 🔍 Debugging output
+          sh 'kubectl get pods -n dev -o wide'
+          sh 'kubectl describe pod -l app=java-devops-app -n dev || true'
+          sh 'kubectl get events -n dev --sort-by=.metadata.creationTimestamp || true'
+          
+          // ✅ Wait for pod to be ready
+          sh 'kubectl wait --for=condition=ready pod -l app=java-devops-app -n dev --timeout=120s'
+          
+          // 🚀 Start port-forward in background
           sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev --address=0.0.0.0 &'
           sleep 5
+          
+          // 🧪 Test the service
           sh 'curl http://localhost:8081/health'
-        }
-      }
-      post {
-        always {
-          echo "Cleaning up background port-forward process..."
-          sh 'pkill -f "kubectl port-forward" || true'
-        }
-      }
-    }
-  }
-}
+          }
+          }
+          post {
+            always {
+              echo "Cleaning up background port-forward process..."
+              sh 'pkill -f "kubectl port-forward" || true'
+              }
+              }
+              }
+              }
+              }
+              }
