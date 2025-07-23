@@ -72,7 +72,7 @@ pipeline {
         }
       }
     }
-
+    
     stage('Configure kubeconfig') {
       steps {
         echo "Configuring kubeconfig for AWS EKS..."
@@ -84,13 +84,13 @@ pipeline {
           )
         ]) {
           sh '''
-            mkdir -p /root/.kube
-            aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /root/.kube/config
+          mkdir -p /home/codespace/.kube
+          aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/codespace/.kube/config
+          chown -R codespace:codespace /home/codespace/.kube
           '''
         }
-      }
     }
-
+}
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
