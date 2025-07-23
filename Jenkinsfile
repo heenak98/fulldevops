@@ -58,10 +58,10 @@ pipeline {
                 mkdir -p /tmp/.docker
                 export DOCKER_CONFIG=/tmp/.docker
 
-                docker build -t java-devops-app:4.0 .
-                docker tag java-devops-app:4.0 heenak.jfrog.io/docker-devops/java-devops-app:4.0
+                docker build -t java-devops-app:5.0 .
+                docker tag java-devops-app:5.0 heenak.jfrog.io/docker-devops/java-devops-app:5.0
                 echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak.jfrog.io
-                docker push heenak.jfrog.io/docker-devops/java-devops-app:4.0
+                docker push heenak.jfrog.io/docker-devops/java-devops-app:5.0
               '''
             } catch (Exception e) {
               echo "Docker push failed: ${e.getMessage()}"
@@ -85,7 +85,7 @@ pipeline {
         ]) {
           sh '''
             mkdir -p /root/.kube
-            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1 --kubeconfig /root/.kube/config
+            aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /root/.kube/config
           '''
         }
       }
