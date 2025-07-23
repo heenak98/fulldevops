@@ -34,8 +34,9 @@ pipeline {
         echo "Running SonarQube analysis..."
         withSonarQubeEnv('SonarQube') {
           sh '''
-            cd demo-app
-            mvn clean verify sonar:sonar
+          mvn -f demo-app/pom.xml clean verify
+          mvn -f demo-app/pom.xml dependency:copy-dependencies
+          mvn sonar:sonar
           '''
         }
       }
