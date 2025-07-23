@@ -55,6 +55,7 @@ services:
       - ./demo-app:/var/jenkins_home/workspace/demo-app
       - ./docker_config/config.json:/root/.docker/config.json
  #     - /home/codespace/.kube/config:/root/.kube/config:ro
+      - kubeconfig_data:/home/codespace/.kube
       - ~/.aws:/root/.aws:ro  # or /var/jenkins_home/.aws if running as jenkins user
     dns: 8.8.8.8  # ✅ Add this line
     dns_search: .
@@ -109,6 +110,8 @@ services:
  
 volumes:
   grafana_data:
+  kubeconfig_data:
+
  
 # --------------------------------------------------
 # ✅ prometheus.yml (Place in root folder)
