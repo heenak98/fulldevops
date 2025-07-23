@@ -94,6 +94,11 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
+        withEnv(["KUBECONFIG=/root/.kube/config"]) {
+          // Step 1: Create namespace
+          sh 'kubectl apply -f k8s/namespace.yaml'
+        }
+
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
           sh '''
             kubectl create secret docker-registry jfrog-creds \
@@ -106,7 +111,7 @@ pipeline {
         }
         withEnv(["KUBECONFIG=/root/.kube/config"]) {
           sh '''
-            kubectl apply -f k8s/namespace.yaml
+            
             kubectl apply -f k8s/deployment.yaml
             kubectl apply -f k8s/service.yaml
           '''
