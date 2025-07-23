@@ -32,10 +32,10 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         echo "Running SonarQube analysis..."
+        dir('demo-app') {
         withSonarQubeEnv('SonarQube') {
-          sh '''
-          mvn -f demo-app/pom.xml clean verify sonar:sonar
-          '''
+        sh  'mvn clean verify sonar:sonar'
+        }
         }
       }
     }
