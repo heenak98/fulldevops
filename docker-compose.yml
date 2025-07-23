@@ -55,8 +55,9 @@ services:
       - ./demo-app:/var/jenkins_home/workspace/demo-app
       - ./docker_config/config.json:/root/.docker/config.json
  #     - /home/codespace/.kube/config:/root/.kube/config:ro
-      - kubeconfig_data:/home/codespace/.kube
       - ~/.aws:/root/.aws:ro  # or /var/jenkins_home/.aws if running as jenkins user
+    environment:
+      - KUBECONFIG=/root/.kube/config
     dns: 8.8.8.8  # ✅ Add this line
     dns_search: .
     restart: always
