@@ -5,7 +5,7 @@ pipeline {
   environment {
     SONAR_SCANNER_HOME = "/opt/sonar-scanner/sonar-scanner/bin"
     SONAR_TOKEN = credentials('sonarqube-token')
-    ARTIFACTORY_URL = "https://heenak98.jfrog.io/artifactory"
+    ARTIFACTORY_URL = "https://heenak.jfrog.io/artifactory"
     ARTIFACTORY_REPO = "docker-devops"
   }
 
@@ -18,7 +18,7 @@ pipeline {
     stage('Checkout') {
       steps {
         echo "Checking out source code..."
-        git branch: 'main', url: 'https://github.com/heena98/fulldevops.git'
+        git branch: 'main', url: 'https://github.com/heenak98/fulldevops.git'
       }
     }
 
@@ -35,9 +35,7 @@ pipeline {
         withSonarQubeEnv('SonarQube') {
           sh '''
             cd demo-app
-            mvn clean install
-            mvn dependency:copy-dependencies
-            sonar-scanner -Dsonar.token=$SONAR_TOKEN
+            mvn clean verify sonar:sonar
           '''
         }
       }
@@ -63,9 +61,9 @@ pipeline {
                 export DOCKER_CONFIG=/tmp/.docker
 
                 docker build -t java-devops-app:4.0 .
-                docker tag java-devops-app:4.0 heenak98.jfrog.io/docker-devops/java-devops-app:4.0
-                echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak98.jfrog.io
-                docker push heenak98.jfrog.io/docker-devops/java-devops-app:4.0
+                docker tag java-devops-app:4.0 heenak.jfrog.io/docker-devops/java-devops-app:4.0
+                echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak.jfrog.io
+                docker push heenak.jfrog.io/docker-devops/java-devops-app:4.0
               '''
             } catch (Exception e) {
               echo "Docker push failed: ${e.getMessage()}"
@@ -90,8 +88,8 @@ pipeline {
           sh '''
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            aws eks update-kubeconfig --name my-eks-cluster-new9 --region us-east-1
-            kubectl config use-context arn:aws:eks:us-east-1:381491874932:cluster/my-eks-cluster-new9
+            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1
+        // kubectl config use-context arn:aws:eks:us-east-1:381491874932:cluster/my-eks-cluster-new13
           '''
         }
       }
