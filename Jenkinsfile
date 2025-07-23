@@ -87,8 +87,7 @@ pipeline {
           sh '''
             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1
-        // kubectl config use-context arn:aws:eks:us-east-1:381491874932:cluster/my-eks-cluster-new13
+            aws eks update-kubeconfig --name my-eks-cluster-new13 --region us-east-1 --profile default
           '''
         }
       }
