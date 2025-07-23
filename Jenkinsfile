@@ -143,9 +143,8 @@ pipeline {
             always {
               echo "Cleaning up background port-forward process..."
               sh 'pkill -f "kubectl port-forward" || true'
-              }
-              }
-              }
-              }
-              }
-              }
+          }
+        }
+      }
+    }
+  }
