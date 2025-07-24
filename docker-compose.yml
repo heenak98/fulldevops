@@ -91,26 +91,26 @@ services:
 #    restart: always
 
 
-  prometheus:
-    image: prom/prometheus:v2.51.2
-    container_name: prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    restart: always
+#  prometheus:
+#   image: prom/prometheus:v2.51.2
+#   container_name: prometheus
+#   ports:
+#     - "9090:9090"
+#   volumes:
+#     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+#   restart: always
  
-  grafana:
-    image: grafana/grafana:10.2.3
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    restart: always
+# grafana:
+#   image: grafana/grafana:10.2.3
+#   container_name: grafana
+#   ports:
+#     - "3000:3000"
+#   volumes:
+#     - grafana_data:/var/lib/grafana
+#   restart: always
  
 volumes:
-  grafana_data:
+# grafana_data:
   kubeconfig_data:
 
  
