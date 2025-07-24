@@ -86,7 +86,7 @@ pipeline {
         ]) {
           sh '''
             mkdir -p /home/codespace/.kube
-            aws eks update-kubeconfig --name my-eks-cluster-new14 --region us-east-1 --kubeconfig /home/codespace/.kube/config
+            aws eks update-kubeconfig --name my-eks-cluster-new15 --region us-east-1 --kubeconfig /home/codespace/.kube/config
           '''
         }
       }
