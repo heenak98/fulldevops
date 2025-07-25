@@ -13,6 +13,16 @@ spec:
       labels:
         app: sonarqube
     spec:
+      initContainers:
+      - name: download-plugin
+        image: curlimages/curl:latest
+        command: ["sh", "-c"]
+        args:
+          - curl -fLo /plugins/sonar-prometheus-exporter.jar https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar
+        volumeMounts:
+        - name: plugins
+          mountPath: /plugins
+
       containers:
       - name: sonarqube
         image: sonarqube:lts-community
@@ -21,13 +31,7 @@ spec:
         volumeMounts:
         - name: plugins
           mountPath: /opt/sonarqube/extensions/plugins
-        command: ["/bin/sh", "-c"]
-        args:
-          - |
-            echo "Downloading Prometheus plugin..."
-            curl -o /opt/sonarqube/extensions/plugins/sonar-prometheus-exporter.jar \
-              https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar && 
-            exec ./bin/run.sh
+
       volumes:
       - name: plugins
         emptyDir: {}
