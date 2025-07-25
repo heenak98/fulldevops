@@ -56,7 +56,7 @@ pipeline {
     stage('Deploy SonarQube with Plugin') {
       steps {
         echo "Applying updated SonarQube deployment..."
-        sh 'kubectl apply -f k8s/sonarqube-deployment.yaml'
+        sh 'kubectl apply -f k8s/sonarqube-deployment.yaml --validate=false'
       }
     }
 
