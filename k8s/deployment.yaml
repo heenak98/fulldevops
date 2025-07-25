@@ -16,7 +16,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: java-app
-        image: heenak.jfrog.io/docker-devops/java-devops-app:6.0
+        image: heenak.jfrog.io/docker-devops/java-devops-app:7.0
         ports:
         - containerPort: 8081
       imagePullSecrets:
