@@ -65,7 +65,7 @@ services:
 
 
   sonarqube:
-    image: sonarqube:10.2.1-community
+    image: sonarqube:7.0-community
     container_name: sonarqube
     ports:
       - "9000:9000"

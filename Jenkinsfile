@@ -1,3 +1,4 @@
+
 pipeline {
   agent any
 
@@ -19,6 +20,29 @@ pipeline {
       steps {
         echo "Checking out source code..."
         git branch: 'main', url: 'https://github.com/heenak98/fulldevops.git'
+      }
+    }
+
+    stage('Build Prometheus Exporter Plugin') {
+      steps {
+        echo "Building SonarQube Prometheus Exporter plugin..."
+        dir('sonarqube-prometheus-exporter') {
+          sh 'mvn clean install'
+        }
+      }
+    }
+
+    stage('Copy Plugin to SonarQube') {
+      steps {
+        echo "Copying plugin JAR to SonarQube plugin directory..."
+        sh 'cp sonarqube-prometheus-exporter/target/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar sonar_extensions/plugins/'
+      }
+    }
+
+    stage('Restart SonarQube') {
+      steps {
+        echo "Restarting SonarQube container..."
+        sh 'docker-compose restart sonarqube'
       }
     }
 
@@ -96,26 +120,17 @@ pipeline {
       steps {
         echo "Deploying to Kubernetes..."
 
-        // Debug cluster access
         sh 'kubectl config current-context'
         sh 'kubectl get nodes'
 
-        // Apply namespace
         sh 'kubectl apply -f k8s/namespace.yaml --validate=false'
 
-        // Create image pull secret
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
           sh '''
-            kubectl create secret docker-registry jfrog-creds \
-              --docker-server=heenak.jfrog.io \
-              --docker-username=$ARTIFACTORY_USER \
-              --docker-password=$ARTIFACTORY_PASS \
-              --docker-email=heenakausarshaikh99@gmail.com \
-              --namespace=dev || true
+            kubectl create secret docker-registry jfrog-creds               --docker-server=heenak.jfrog.io               --docker-username=$ARTIFACTORY_USER               --docker-password=$ARTIFACTORY_PASS               --docker-email=heenakausarshaikh99@gmail.com               --namespace=dev || true
           '''
         }
 
-        // Apply deployment and service
         sh '''
           kubectl apply -f k8s/deployment.yaml
           kubectl apply -f k8s/service.yaml
