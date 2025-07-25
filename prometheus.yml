@@ -13,4 +13,5 @@ scrape_configs:
  
   - job_name: 'sonarqube'
     static_configs:
-      - targets: ['sonarqube:9000']
+      - targets: ['super-lamp-q7xw475rq994f4gvx-9000.app.github.dev:443']
+    scheme: https

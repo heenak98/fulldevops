@@ -1,3 +1,0 @@
-[submodule "sonarqube-prometheus-exporter"]
-	path = sonarqube-prometheus-exporter
-	url = https://github.com/dmeiners88/sonarqube-prometheus-exporter.git
