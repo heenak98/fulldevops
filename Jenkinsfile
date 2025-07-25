@@ -14,6 +14,14 @@ pipeline {
   }
 
   stages {
+    
+    stage('Clean Workspace') {
+      steps {
+        echo "Cleaning Jenkins workspace..."
+        deleteDir()
+        }
+      }
+
 
     stage('Checkout') {
       steps {
