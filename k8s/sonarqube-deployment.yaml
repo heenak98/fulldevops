@@ -26,7 +26,7 @@ spec:
           - |
             echo "Downloading Prometheus plugin..."
             curl -o /opt/sonarqube/extensions/plugins/sonar-prometheus-exporter.jar \
-              https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar &&
+              https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar && 
             exec ./bin/run.sh
       volumes:
       - name: plugins
