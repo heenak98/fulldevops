@@ -63,18 +63,17 @@ pipeline {
     
     stage('Create JFrog Auth Secret') {
       steps {
-    echo "Creating Kubernetes secret for JFrog authentication..."
-    withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
-      sh '''#!/bin/bash
-        kubectl create secret generic jfrog-auth \
+        echo "Creating Kubernetes secret for JFrog authentication..."
+        withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
+          sh '''#!/bin/bash
+          kubectl create secret generic jfrog-auth \
           --from-literal=username=$ARTIFACTORY_USER \
           --from-literal=apikey=$ARTIFACTORY_PASS \
           -n dev --dry-run=client -o yaml | kubectl apply --validate=false -f -
-      '''
+          '''
+        }
+      }
     }
-  }
-}
-
     
    stage('Deploy SonarQube with Plugin') {
       steps {
