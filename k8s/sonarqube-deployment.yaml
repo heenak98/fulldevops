@@ -18,7 +18,18 @@ spec:
         image: curlimages/curl:latest
         command: ["sh", "-c"]
         args:
-          - curl -fLo /plugins/sonar-prometheus-exporter.jar https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar
+          - curl -u $ARTIFACTORY_USER:$ARTIFACTORY_API_KEY -fLo /plugins/sonar-prometheus-exporter.jar https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar
+        env:
+        - name: ARTIFACTORY_USER
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-auth
+              key: username
+        - name: ARTIFACTORY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: jfrog-auth
+              key: apikey
         volumeMounts:
         - name: plugins
           mountPath: /plugins
