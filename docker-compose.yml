@@ -63,9 +63,10 @@ services:
     networks:
       - devops-net
 
-
   sonarqube:
-    image: sonarqube:7.0-community
+    build:
+      context: .
+      dockerfile: Dockerfile.sonarqube
     container_name: sonarqube
     ports:
       - "9000:9000"
@@ -73,11 +74,13 @@ services:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
     volumes:
       - ./sonar_data:/opt/sonarqube/data
-      - ./sonar_extensions/plugins:/opt/sonarqube/extensions/plugins
+      - ./sonar_extensions/plugins:/opt/sonarqube/extensions/plugins  # ✅ Mount plugin dir
     restart: always
     mem_limit: 2g
     networks:
       - devops-net
+
+
 
   prometheus:
    image: prom/prometheus:v2.51.2

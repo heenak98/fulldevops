@@ -1,4 +1,3 @@
-
 pipeline {
   agent any
 
@@ -23,35 +22,54 @@ pipeline {
       }
     }
 
-    stage('Build Prometheus Exporter Plugin') {
+    stage('Build with Maven') {
       steps {
-        echo "Building SonarQube Prometheus Exporter plugin..."
-        dir('sonarqube-prometheus-exporter') {
+        echo "Building project with Maven..."
+        dir('demo-app') {
           sh 'mvn clean install'
         }
       }
     }
 
-    stage('Copy Plugin to SonarQube') {
+    stage('Build SonarQube Exporter Plugin') {
       steps {
-        echo "Copying plugin JAR to SonarQube plugin directory..."
-        sh 'cp sonarqube-prometheus-exporter/target/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar sonar_extensions/plugins/'
+        echo "Building SonarQube Prometheus exporter plugin..."
+        dir('sonarqube-prometheus-exporter') {
+          sh 'mvn clean package -DskipTests'
+        }
       }
     }
 
-    stage('Restart SonarQube') {
+    stage('Push Plugin to Artifactory') {
       steps {
-        echo "Restarting SonarQube container..."
-        sh 'docker-compose restart sonarqube'
+        echo "Uploading plugin JAR to JFrog Artifactory..."
+        withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
+          sh '''
+            curl -u $ARTIFACTORY_USER:$ARTIFACTORY_PASS \
+            -T sonarqube-prometheus-exporter/target/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar \
+            "https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar"
+          '''
+        }
+      }
+    }
+    
+    stage('Deploy SonarQube with Plugin') {
+      steps {
+        echo "Applying updated SonarQube deployment..."
+        sh 'kubectl apply -f k8s/sonarqube-deployment.yaml'
       }
     }
 
-    stage('Build with Maven') {
+    stage('Restart SonarQube Deployment') {
       steps {
-        echo "Building project with Maven..."
-        sh 'cd demo-app && mvn clean install'
+        echo "Restarting SonarQube deployment in Kubernetes..."
+        sh '''
+        kubectl rollout restart deployment sonarqube -n dev
+        kubectl wait --for=condition=available deployment/sonarqube -n dev --timeout=120s
+        '''
       }
     }
+
 
     stage('SonarQube Analysis') {
       steps {
@@ -78,21 +96,19 @@ pipeline {
         echo "Building and pushing Docker image..."
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
           script {
-            try {
-              sh '''
-                mkdir -p /tmp/.docker
-                export DOCKER_CONFIG=/tmp/.docker
+            def version = new Date().format("yyyyMMddHHmm")
+            def imageTag = "java-devops-app:${version}"
+            def fullImage = "heenak.jfrog.io/docker-devops/${imageTag}"
 
-                docker build -t java-devops-app:7.0 .
-                docker tag java-devops-app:7.0 heenak.jfrog.io/docker-devops/java-devops-app:7.0
-                echo $ARTIFACTORY_PASS | docker login -u $ARTIFACTORY_USER --password-stdin heenak.jfrog.io
-                docker push heenak.jfrog.io/docker-devops/java-devops-app:7.0
-              '''
-            } catch (Exception e) {
-              echo "Docker push failed: ${e.getMessage()}"
-              currentBuild.result = 'FAILURE'
-              error("Stopping pipeline due to Docker push failure.")
-            }
+            sh """
+              mkdir -p /tmp/.docker
+              export DOCKER_CONFIG=/tmp/.docker
+
+              docker build -t ${imageTag} .
+              docker tag ${imageTag} ${fullImage}
+              echo \$ARTIFACTORY_PASS | docker login -u \$ARTIFACTORY_USER --password-stdin heenak.jfrog.io
+              docker push ${fullImage}
+            """
           }
         }
       }
@@ -101,13 +117,7 @@ pipeline {
     stage('Configure kubeconfig') {
       steps {
         echo "Configuring kubeconfig for AWS EKS..."
-        withCredentials([
-          usernamePassword(
-            credentialsId: 'aws-static-creds',
-            usernameVariable: 'AWS_ACCESS_KEY_ID',
-            passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-          )
-        ]) {
+        withCredentials([usernamePassword(credentialsId: 'aws-static-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           sh '''
             mkdir -p /home/codespace/.kube
             aws eks update-kubeconfig --name my-eks-cluster-new16 --region us-east-1 --kubeconfig /home/codespace/.kube/config
@@ -119,15 +129,16 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         echo "Deploying to Kubernetes..."
-
-        sh 'kubectl config current-context'
-        sh 'kubectl get nodes'
-
         sh 'kubectl apply -f k8s/namespace.yaml --validate=false'
 
         withCredentials([usernamePassword(credentialsId: 'jfrog-username-password', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASS')]) {
           sh '''
-            kubectl create secret docker-registry jfrog-creds               --docker-server=heenak.jfrog.io               --docker-username=$ARTIFACTORY_USER               --docker-password=$ARTIFACTORY_PASS               --docker-email=heenakausarshaikh99@gmail.com               --namespace=dev || true
+            kubectl create secret docker-registry jfrog-creds \
+              --docker-server=heenak.jfrog.io \
+              --docker-username=$ARTIFACTORY_USER \
+              --docker-password=$ARTIFACTORY_PASS \
+              --docker-email=heenakausarshaikh99@gmail.com \
+              --namespace=dev || true
           '''
         }
 
@@ -142,10 +153,6 @@ pipeline {
       steps {
         echo "Running port-forward and testing service..."
         script {
-          sh 'kubectl get pods -n dev -o wide'
-          sh 'kubectl describe pod -l app=java-devops-app -n dev || true'
-          sh 'kubectl get events -n dev --sort-by=.metadata.creationTimestamp || true'
-
           sh 'kubectl wait --for=condition=ready pod -l app=java-devops-app -n dev --timeout=120s'
           sh 'kubectl port-forward svc/java-devops-service 8081:80 -n dev --address=0.0.0.0 &'
           sleep 5

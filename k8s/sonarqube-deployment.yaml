@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      containers:
+      - name: sonarqube
+        image: sonarqube:lts-community
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: plugins
+          mountPath: /opt/sonarqube/extensions/plugins
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Downloading Prometheus plugin..."
+            curl -o /opt/sonarqube/extensions/plugins/sonar-prometheus-exporter.jar \
+              https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar &&
+            exec ./bin/run.sh
+      volumes:
+      - name: plugins
+        emptyDir: {}

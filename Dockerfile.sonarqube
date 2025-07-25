@@ -1,0 +1,13 @@
+# Dockerfile.sonarqube
+
+# Stage 1: Build the plugin
+#FROM maven:3.9.6-eclipse-temurin-17 AS builder
+#WORKDIR /build
+#COPY sonarqube-prometheus-exporter /build
+#RUN mvn clean package -DskipTests
+
+# Stage 2: SonarQube with plugin
+FROM sonarqube:lts-community
+#COPY --from=builder /build/target/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar /opt/sonarqube/extensions/plugins/
+
+ADD https://heenak.jfrog.io/artifactory/docker-devops/sonar-prometheus-exporter-1.0.0-SNAPSHOT.jar /opt/sonarqube/extensions/plugins/
