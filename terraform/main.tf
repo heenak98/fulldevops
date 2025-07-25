@@ -28,7 +28,7 @@ module "vpc" {
  
 module "eks_cluster" {
   source             = "./modules/eks_cluster"
-  cluster_name       = "my-eks-cluster-new15"
+  cluster_name       = "my-eks-cluster-new16"
   cluster_role_arn   = module.iam_cluster_role.iam_role_arn
   subnet_ids         = module.vpc.private_subnet_ids
   kubernetes_version = "1.27"
